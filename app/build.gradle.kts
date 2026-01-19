@@ -19,10 +19,29 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            // Determine if we are running on GitHub Actions or locally
+            val isCI = System.getenv("CI") == "true"
+            
+            if (isCI) {
+                // In CI, we use environment variables
+                storeFile = file(System.getenv("KEYSTORE_PATH") ?: "release.jks")
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            } else {
+                // Local development fallback (optional, can be configured via local.properties if needed)
+                // For now, we just leave it empty or you can configure it manually
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
