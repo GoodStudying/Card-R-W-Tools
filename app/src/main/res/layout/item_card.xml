@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 外层用FrameLayout包裹内容区域和删除按钮 -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:app="http://schemas.android.com/apk/res-auto"
+             android:layout_width="match_parent"
+             android:layout_height="wrap_content">
+    <!-- 原有内容区域 (滑动时会被移开，露出删除按钮) -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/content_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:paddingVertical="6dp">
+
+        <!-- 原有元素保持不变 -->
+        <TextView
+                android:id="@+id/filamentTypeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PETG HF"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+                android:id="@+id/spoolWeightText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingEnd="10dp"
+                android:text="1000g"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@+id/filamentTypeText"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+                android:id="@+id/filamentLengthText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="82米"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintTop_toBottomOf="@+id/filamentTypeText"
+                app:layout_constraintStart_toEndOf="@+id/spoolWeightText"/>
+
+        <TextView
+                android:id="@+id/cardIdLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="UID: "
+                android:textSize="15sp"
+                app:layout_constraintTop_toBottomOf="@+id/spoolWeightText"
+                app:layout_constraintStart_toStartOf="parent"/>
+
+        <TextView
+                android:id="@+id/UIDText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="15824C0D"
+                android:textSize="15sp"
+                app:layout_constraintStart_toEndOf="@+id/cardIdLabel"
+                app:layout_constraintTop_toTopOf="@+id/cardIdLabel"/>
+
+        <TextView
+                android:id="@+id/filamentColorText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="#FF00AE42"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/filamentTypeText"/>
+
+        <TextView
+                android:id="@+id/filamentColorIndicator"
+                android:layout_width="0dp"
+                android:layout_height="20dp"
+                android:background="#FF00AE42"
+                app:layout_constraintTop_toBottomOf="@+id/filamentColorText"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/filamentColorText"/>
+
+        <TextView
+                android:id="@+id/productionDateText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="2024/04/11 19:05"
+                android:textSize="15sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="@+id/filamentTypeText"
+                app:layout_constraintBottom_toBottomOf="@+id/filamentTypeText"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</FrameLayout>

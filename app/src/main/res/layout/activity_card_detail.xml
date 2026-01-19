@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true"
+        tools:context=".MainActivity">
+
+    <LinearLayout
+            android:id="@+id/linearLayout2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp"
+            android:paddingTop="10dp"
+            app:layout_constraintTop_toTopOf="parent">
+
+        <!-- UID（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="UID: "
+                    android:textSize="30sp"
+                    android:textStyle="bold"/>
+            <TextView
+                    android:id="@+id/UIDText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="01020304"
+                    android:textSize="30sp"
+                    android:textStyle="bold"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 耗材类型（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="耗材类型: "
+                    android:textSize="20sp"/>
+            <TextView
+                    android:id="@+id/filamentTypeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PETG HF"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 材料ID（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="材料ID: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/materialIDText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="G02-W0/GFG02"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 生产日期（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="生产日期: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/productionDateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="2025/10/31 12:39"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 耗材颜色（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="颜耗材色(ARGB): "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/filamentColorText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="#FFFFFFFF"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+            <TextView
+                    android:id="@+id/filamentColorIndicator"
+                    android:layout_width="80dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20dp"
+                    android:background="#CCFFEE"
+                    android:text=" "
+                    android:textSize="15sp"/>
+        </LinearLayout>
+
+        <!-- 耗材直径（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="耗材直径: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/filamentDiameterText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1.75 mm"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 耗材长度（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="耗材长度: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/filamentLengthText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="325 米"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 线轴重量（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="线轴重量: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/spoolWeightText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1000 g"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 线轴宽度（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="线轴宽度: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/spoolWidthText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="325 mm"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 热床温度（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="热床温度: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/bedTemperatureText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="200 ℃"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 最小喷嘴直径（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="最小喷嘴直径: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/minimumNozzleDiameterText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0.4 mm"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 热端温度（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="热端温度: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/temperatureHotendText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="200 ℃ - 325 ℃"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 干燥温度（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="干燥温度: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/dryingTemperatureText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="200 ℃"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 干燥时间（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="干燥时间: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/dryingHoursText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="8 H"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+
+        <!-- 托盘UID（支持复制） -->
+        <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="6dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="托盘UID: "
+                    android:textSize="15sp"/>
+            <TextView
+                    android:id="@+id/trayUIDText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="132131231232321"
+                    android:textSize="15sp"
+                    android:textIsSelectable="true"/> <!-- 开启复制 -->
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 底部按钮区域（保持不变） -->
+    <LinearLayout
+            android:id="@+id/linearLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent">
+        <Button
+                android:id="@+id/saveBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:text="保存卡片"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+        <Button
+                android:id="@+id/createNewCardBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                android:layout_weight="1"
+                android:text="写入新卡"
+                app:layout_constraintBottom_toBottomOf="parent"/>
+    </LinearLayout>
+
+    <!-- 写入卡片弹窗（保持不变） -->
+    <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/writeView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#80000000"
+            android:clickable="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:visibility="gone">
+        <TextView
+                android:id="@+id/writeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="请刷要写入的新FUID卡片"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@+id/remarkText"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+        <TextView
+                android:id="@+id/remarkText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="注意: 每张卡片只能写入一次"
+                android:textColor="#FF0000"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"/>
+        <TextView
+                android:id="@+id/closeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="80dp"
+                android:text=" 关闭 "
+                android:textColor="@android:color/white"
+                android:textSize="30sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
