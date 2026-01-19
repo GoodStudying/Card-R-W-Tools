@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BCardTools"
+rootProject.name = "BCardTools V2"
 include(":app")
  
