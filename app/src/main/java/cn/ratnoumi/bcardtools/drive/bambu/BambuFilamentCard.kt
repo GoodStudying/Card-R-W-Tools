@@ -51,7 +51,12 @@ data class BambuFilamentCard(
         productionDate = parcel.readString() ?: "",
         filamentLength = parcel.readInt(),
         // 读取MifareCard（需确保MifareCard已实现Parcelable）
-        card = parcel.readParcelable(MifareCard::class.java.classLoader)!!
+        card = if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            parcel.readParcelable(MifareCard::class.java.classLoader, MifareCard::class.java)!!
+        } else {
+            @Suppress("DEPRECATION")
+            parcel.readParcelable(MifareCard::class.java.classLoader)!!
+        }
     )
 
     // 序列化到Parcel（写入顺序需与构造函数读取顺序完全一致）

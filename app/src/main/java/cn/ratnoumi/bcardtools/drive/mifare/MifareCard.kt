@@ -11,7 +11,12 @@ data class MifareCard(
     constructor(parcel: Parcel) : this(
         mSize = parcel.readInt(),
         blocks = mutableListOf<ByteArray>().apply {
-            parcel.readList(this, ByteArray::class.java.classLoader)
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                parcel.readList(this, ByteArray::class.java.classLoader, ByteArray::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                parcel.readList(this, ByteArray::class.java.classLoader)
+            }
         }
     )
 
