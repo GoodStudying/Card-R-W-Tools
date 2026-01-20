@@ -4,7 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
-import com.zkhg.seatbeltlock.dao.BambuFilamentDao
+import cn.ratnoumi.bcardtools.dao.BambuFilamentDao
 import kotlin.concurrent.Volatile
 
 /**
