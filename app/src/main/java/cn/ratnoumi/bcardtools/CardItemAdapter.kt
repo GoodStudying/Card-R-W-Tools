@@ -9,8 +9,13 @@ import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import cn.ratnoumi.bcardtools.drive.bambu.BambuFilamentCard
 
+data class CardItem(
+    val card: BambuFilamentCard,
+    val count: Int
+)
+
 class CardItemAdapter(
-    val cards: List<BambuFilamentCard>,
+    var items: List<CardItem>,
     val onItemClick: (BambuFilamentCard) -> Unit,
     val onDelete: (BambuFilamentCard) -> Unit
 ) :
@@ -22,15 +27,24 @@ class CardItemAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.filamentTypeText.text = cards[position].detailedFilamentType
-        holder.spoolWeightText.text = "${cards[position].spoolWeight}g"
-        holder.filamentLengthText.text = "${cards[position].filamentLength}米"
-        holder.UIDText.text = cards[position].uid
-        holder.productionDate.text = cards[position].productionDate
-        holder.filamentColorText.text = "#${Integer.toHexString(cards[position].color).uppercase()}"
-        holder.filamentColorIndicator.setBackgroundColor(cards[position].color)
+        val item = items[position]
+        val card = item.card
+        
+        if (item.count > 1) {
+            holder.filamentTypeText.text = "${card.detailedFilamentType} (x${item.count})"
+            holder.UIDText.text = "${card.uid}..." // Indicate multiple
+        } else {
+            holder.filamentTypeText.text = card.detailedFilamentType
+            holder.UIDText.text = card.uid
+        }
+        
+        holder.spoolWeightText.text = "${card.spoolWeight}g"
+        holder.filamentLengthText.text = "${card.filamentLength}米"
+        holder.productionDate.text = card.productionDate
+        holder.filamentColorText.text = "#${Integer.toHexString(card.color).uppercase()}"
+        holder.filamentColorIndicator.setBackgroundColor(card.color)
         holder.itemView.setOnClickListener {
-            onItemClick(cards[position])
+            onItemClick(card)
         }
         holder.itemView.setOnLongClickListener {
             showDeleteDialog(holder.itemView.context, position)
@@ -46,7 +60,7 @@ class CardItemAdapter(
             .setPositiveButton("删除") { dialog, _ ->
                 notifyItemRemoved(position)
                 // 通知外部处理删除逻辑
-                onDelete(cards[position])
+                onDelete(items[position].card)
                 dialog.dismiss()
             }
             .setNegativeButton("取消") { dialog, _ ->
@@ -57,7 +71,7 @@ class CardItemAdapter(
     }
 
 
-    override fun getItemCount() = cards.size
+    override fun getItemCount() = items.size
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val filamentTypeText: TextView = itemView.findViewById(R.id.filamentTypeText)

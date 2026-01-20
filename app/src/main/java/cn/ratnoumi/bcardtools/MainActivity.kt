@@ -29,12 +29,15 @@ import cn.ratnoumi.bcardtools.databinding.ActivityMainBinding
 import cn.ratnoumi.bcardtools.drive.bambu.BambuFilamentCard
 import cn.ratnoumi.bcardtools.drive.bambu.bambuKdf
 import cn.ratnoumi.bcardtools.drive.bambu.getBambuFilament
+import cn.ratnoumi.bcardtools.drive.bambu.getBambuFilament
 import cn.ratnoumi.bcardtools.drive.mifare.MifareCard
 import cn.ratnoumi.bcardtools.drive.mifare.findMifareSectorKeyA
 import cn.ratnoumi.bcardtools.drive.mifare.findMifareSectorKeyB
 import cn.ratnoumi.bcardtools.drive.mifare.readMifareSector
 import cn.ratnoumi.bcardtools.utils.FileExporter
 import cn.ratnoumi.bcardtools.dao.BambuFilamentDao
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -56,28 +59,13 @@ class MainActivity : BaseNfcAppCompatActivity() {
 
     lateinit var bambuFilamentDao: BambuFilamentDao
 
-    private val filteredCards = mutableListOf<BambuFilamentCard>() // 用于搜索和筛选的列表
+    private var displayedItems = listOf<CardItem>() // 用于显示的列表 (分组后)
     private var currentCategory: String? = null // 当前选中的分类
     private lateinit var searchText: String // 当前搜索文本
 
 
-    // 新增：分类标签点击事件
-    private val onCategoryClick = View.OnClickListener { view ->
-        // 重置所有标签样式
-        binding.categoryContainer.children.forEach {
-            it.setBackgroundResource(R.drawable.category_unselected_bg)
-            (it as TextView).setTextColor(resources.getColor(android.R.color.darker_gray, theme))
-            (it as TextView).setTextColor(resources.getColor(android.R.color.darker_gray, theme))
-        }
+    // 移除旧的 onCategoryClick，Chip 自带点击监听
 
-        // 设置当前标签样式
-        view.setBackgroundResource(R.drawable.category_selected_bg)
-        (view as TextView).setTextColor(resources.getColor(android.R.color.white, theme))
-
-        // 更新当前分类并筛选
-        currentCategory = view.tag as String
-        filterCards()
-    }
 
     // 新增：初始化搜索框
     private fun initSearchView() {
@@ -117,9 +105,20 @@ class MainActivity : BaseNfcAppCompatActivity() {
             categoryMatch && searchMatch
         }
 
-        filteredCards.addAll(result)
+        // 2. 分组逻辑: 按 "详细耗材类型" + "颜色" 分组
+        val grouped = result.groupBy { it.detailedFilamentType to it.color }
+            .map { (key, group) ->
+                // key.first 是 type, key.second 是 color
+                // 组内选择第一张作为代表
+                CardItem(group.first(), group.size)
+            }
+            .sortedBy { it.card.detailedFilamentType } // 可选：排序
+
+        displayedItems = grouped
+        cardItemAdapter.items = displayedItems
         cardItemAdapter.notifyDataSetChanged()
-        binding.nullView.visibility = if (filteredCards.isEmpty()) View.VISIBLE else View.GONE
+        
+        binding.nullView.visibility = if (displayedItems.isEmpty()) View.VISIBLE else View.GONE
     }
 
     // 重写：更新列表并生成分类
@@ -140,7 +139,7 @@ class MainActivity : BaseNfcAppCompatActivity() {
         filterCards()
     }
 
-    // 新增：生成分类标签
+    // 新增：生成分类标签 (使用 Chips)
     private fun generateCategories() {
         binding.categoryContainer.removeAllViews()
 
@@ -149,25 +148,28 @@ class MainActivity : BaseNfcAppCompatActivity() {
         categories.add("全部") // 添加"全部"选项
         cards.forEach { categories.add(it.detailedFilamentType) }
 
-        // 动态创建分类标签
+        // 动态创建 Chip
         categories.forEach { category ->
-            val textView = TextView(this).apply {
+            val chip = Chip(this).apply {
                 text = category
-                textSize = 13f
-                setPadding(16.dpToPx(), 8.dpToPx(), 16.dpToPx(), 8.dpToPx())
-                setBackgroundResource(if (category == "全部") R.drawable.category_selected_bg else R.drawable.category_unselected_bg)
-                setTextColor(
-                    if (category == "全部")
-                        resources.getColor(android.R.color.white, theme)
-                    else
-                        resources.getColor(android.R.color.darker_gray, theme)
-                )
-                tag = category // 存储分类值
-                setOnClickListener(onCategoryClick)
-                setMargins(4.dpToPx(), 0, 4.dpToPx(), 0)
+                isCheckable = true
+                isCheckedIconVisible = false
+                tag = category
+                
+                // 设置当选中时的行为
+                setOnCheckedChangeListener { _, isChecked ->
+                    if (isChecked) {
+                        currentCategory = category
+                        filterCards()
+                    } 
+                }
             }
-            binding.categoryContainer.addView(textView)
+            binding.categoryContainer.addView(chip)
         }
+        
+        // 默认选中"全部" (或者保持之前的选中状态)
+        val targetCategory = currentCategory ?: "全部"
+        binding.categoryContainer.children.filterIsInstance<Chip>().find { it.tag == targetCategory }?.isChecked = true
     }
 
     // 新增：扩展函数，dp转px
@@ -372,7 +374,7 @@ class MainActivity : BaseNfcAppCompatActivity() {
 
         // 初始化适配器，使用筛选后的列表
         cardItemAdapter = CardItemAdapter(
-            filteredCards,
+            displayedItems,
             onItemClick = { startActivityCardDetail(it) },
             onDelete = {
                 bambuFilamentDao.delete(it.uid)
@@ -547,7 +549,7 @@ class MainActivity : BaseNfcAppCompatActivity() {
         }
     }
 
-    private fun processBinData(binBytes: ByteArray) {
+    private fun processBinData(binBytes: ByteArray, refreshUi: Boolean = true) {
         try {
             val card = MifareCard(binBytes.size)
             for (blockIndex in 0..<card.getBlockCount()) {
@@ -564,10 +566,12 @@ class MainActivity : BaseNfcAppCompatActivity() {
                 }
             }
             val bambuCard = getBambuFilament(card)
-            addBambuFilament(bambuCard)
+            addBambuFilament(bambuCard, refreshUi)
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(baseContext, "BIN文件解析失败", Toast.LENGTH_SHORT).show()
+            runOnUiThread {
+                Toast.makeText(baseContext, "BIN文件解析失败", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -577,7 +581,7 @@ class MainActivity : BaseNfcAppCompatActivity() {
         }
     }
 
-    private fun processMctStream(inputStream: java.io.InputStream) {
+    private fun processMctStream(inputStream: java.io.InputStream, refreshUi: Boolean = true) {
         try {
             val card = MifareCard(MifareClassic.SIZE_1K)
             // Use CloseShieldInputStream if we were using a library that closes it,
@@ -608,25 +612,33 @@ class MainActivity : BaseNfcAppCompatActivity() {
                 }
             }
             val bambuCard = getBambuFilament(card)
-            addBambuFilament(bambuCard)
+            addBambuFilament(bambuCard, refreshUi)
         } catch (e: Exception) {
             e.printStackTrace()
-            Toast.makeText(baseContext, "MCT文件解析失败", Toast.LENGTH_SHORT).show()
+            runOnUiThread {
+                Toast.makeText(baseContext, "MCT文件解析失败", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    fun addBambuFilament(bambuCard: BambuFilamentCard) {
+    fun addBambuFilament(bambuCard: BambuFilamentCard, refreshUi: Boolean = true) {
         val keys = bambuKdf(bambuCard.card.getId())
         for (i in 0..<keys.size) {
             if (!keys[i].contentEquals(bambuCard.card.getKeyA(i))) {
-                Toast.makeText(baseContext, "非某竹卡片,导入失败!", Toast.LENGTH_SHORT).show()
+                runOnUiThread {
+                    Toast.makeText(baseContext, "非某竹卡片,导入失败!", Toast.LENGTH_SHORT).show()
+                }
                 return
             }
         }
         if (!bambuFilamentDao.exist(bambuCard.uid)) {
             bambuFilamentDao.add(bambuCard)
         }
-        updateList()
+        if (refreshUi) {
+             runOnUiThread {
+                updateList()
+             }
+        }
     }
 
     fun handleZipFile(uri: Uri) {
@@ -655,12 +667,12 @@ class MainActivity : BaseNfcAppCompatActivity() {
                                 runCatching {
                                     if (name.endsWith(".bin", ignoreCase = true)) {
                                         if (bytes.size.toLong() == 1024L || bytes.size.toLong() == 4096L) { // Basic size check
-                                             processBinData(bytes)
+                                             processBinData(bytes, refreshUi = false)
                                              successCount++
                                         }
                                     } else if (name.endsWith(".mct", ignoreCase = true)) {
                                         // Wrap bytes in stream for Mct processor
-                                        processMctStream(java.io.ByteArrayInputStream(bytes))
+                                        processMctStream(java.io.ByteArrayInputStream(bytes), refreshUi = false)
                                         successCount++
                                     }
                                 }.onFailure {

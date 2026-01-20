@@ -33,15 +33,19 @@
         <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:scrollbars="none">
+                android:scrollbars="none"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingVertical="5dp">
 
-            <LinearLayout
+            <!-- 分类标签栏 -->
+            <com.google.android.material.chip.ChipGroup
                     android:id="@+id/categoryContainer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="5dp"/>
+                    app:singleLine="true"
+                    app:selectionRequired="true"
+                    app:singleSelection="true"/>
         </HorizontalScrollView>
     </com.google.android.material.appbar.AppBarLayout>
 
