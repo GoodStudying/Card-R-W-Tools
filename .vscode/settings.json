@@ -1,3 +1,4 @@
 {
-    "gradle.nestedProjects": false
+    "gradle.nestedProjects": false,
+    "git.autofetch": true
 }
