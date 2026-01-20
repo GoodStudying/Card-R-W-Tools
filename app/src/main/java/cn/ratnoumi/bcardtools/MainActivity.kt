@@ -439,7 +439,15 @@ class MainActivity : BaseNfcAppCompatActivity() {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 putExtra(
                     Intent.EXTRA_MIME_TYPES,
-                    arrayOf("application/octet-stream", "application/bin", "application/mct", "*/mct", "*/bin")
+                    arrayOf(
+                        "application/octet-stream", 
+                        "application/bin", 
+                        "application/mct", 
+                        "*/mct", 
+                        "*/bin",
+                        "application/zip",
+                        "application/x-zip-compressed"
+                    )
                 ) // 优先二进制文件
                 // 添加多选支持
                 putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
@@ -514,6 +522,8 @@ class MainActivity : BaseNfcAppCompatActivity() {
                                         }
                                     } else if (binName.endsWith(".mct")) {
                                         handeMctCardFile(binName, binLength, uri)
+                                    } else if (binName.endsWith(".zip")) {
+                                        handleZipFile(uri)
                                     } else {
                                         Toast.makeText(baseContext, "不支持的文件类型!", Toast.LENGTH_SHORT)
                                             .show()
@@ -527,56 +537,81 @@ class MainActivity : BaseNfcAppCompatActivity() {
 
     fun handeBinCardFile(fileName: String, size: Long, uri: Uri) {
         contentResolver.openInputStream(uri)?.use { inStream ->
-            val buffer = ByteArray(4096) // 缓冲区大小，4096 字节较常用
+            val buffer = ByteArray(4096)
             var bytesRead: Int
             val output = ByteArrayOutputStream()
-            // 循环读取流数据到缓冲区，直到读完（bytesRead == -1）
             while (inStream.read(buffer).also { bytesRead = it } != -1) {
                 output.write(buffer, 0, bytesRead)
             }
-
-            val binBytes = output.toByteArray() // 转换为字节数组并返回
-            val card = MifareCard(binBytes.size)
-            for (blockIndex in 0..<card.getBlockCount()) {
-                card.blocks.add(
-                    blockIndex,
-                    binBytes.copyOfRange(
-                        blockIndex * MifareClassic.BLOCK_SIZE,
-                        (blockIndex + 1) * MifareClassic.BLOCK_SIZE
-                    )
-                )
-            }
-            val bambuCard = getBambuFilament(card)
-            addBambuFilament(bambuCard)
+            processBinData(output.toByteArray())
         }
     }
 
-    fun handeMctCardFile(fileName: String, size: Long, uri: Uri) {
-        // 读取字符流（指定编码为UTF-8，根据实际文件编码调整）
-        contentResolver.openInputStream(uri)?.use { inputStream ->
-            val card = MifareCard(MifareClassic.SIZE_1K)
-            // 将字节流转换为字符流（指定编码，避免乱码）
-            InputStreamReader(inputStream, Charsets.UTF_8).use { inputStreamReader ->
-                // 用BufferedReader包装，高效读取字符
-                BufferedReader(inputStreamReader).use { bufferedReader ->
-                    var sectorIndex = 0;
-                    var blockIndex = 0;
-                    var line: String?
-                    while (bufferedReader.readLine().also { line = it } != null) {
-                        Log.d("FileContent", "行内容: $line")
-                        line?.let {
-                            if (it.startsWith("+Sector: ")) {
-                                sectorIndex = it.substring(9).toInt()
-                                blockIndex = card.sectorToBlock(sectorIndex)
-                            } else {
-                                card.blocks.add(blockIndex++, hexToByteArray(line))
-                            }
-                        }
-                    }
+    private fun processBinData(binBytes: ByteArray) {
+        try {
+            val card = MifareCard(binBytes.size)
+            for (blockIndex in 0..<card.getBlockCount()) {
+                // Determine block size based on card type or assume standard if not clear,
+                // but here we just slice the array.
+                // Safety check to avoid index out of bounds if file is truncated
+                val start = blockIndex * MifareClassic.BLOCK_SIZE
+                val end = (blockIndex + 1) * MifareClassic.BLOCK_SIZE
+                if (end <= binBytes.size) {
+                    card.blocks.add(
+                        blockIndex,
+                        binBytes.copyOfRange(start, end)
+                    )
                 }
             }
             val bambuCard = getBambuFilament(card)
             addBambuFilament(bambuCard)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(baseContext, "BIN文件解析失败", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun handeMctCardFile(fileName: String, size: Long, uri: Uri) {
+        contentResolver.openInputStream(uri)?.use { inputStream ->
+            processMctStream(inputStream)
+        }
+    }
+
+    private fun processMctStream(inputStream: java.io.InputStream) {
+        try {
+            val card = MifareCard(MifareClassic.SIZE_1K)
+            // Use CloseShieldInputStream if we were using a library that closes it,
+            // but here we just wrap it. Responsibility to close prompt stream lies with caller
+            // IF caller opened it. But BufferedReader closes underlying stream.
+            // For ZIP, wrapping ZipInputStream in BufferedReader and closing BufferedReader will close ZipInputStream!
+            // So we must NOT close the reader if it comes from ZipInputStream.
+            // SOLUTION: for ZIP, we read entry to bytes/string first, then parse.
+            
+            // For consistency and safety with ZipInputStream, let's read everything to String first.
+            val reader = BufferedReader(InputStreamReader(inputStream, Charsets.UTF_8))
+            val lines = reader.readLines() // Read all lines
+            
+            var sectorIndex = 0
+            var blockIndex = 0
+            
+            for (line in lines) {
+                Log.d("FileContent", "行内容: $line")
+                if (line.startsWith("+Sector: ")) {
+                    sectorIndex = line.substring(9).toInt()
+                    blockIndex = card.sectorToBlock(sectorIndex)
+                } else if (line.length >= 32) { // Basic validation for hex line
+                     try {
+                        card.blocks.add(blockIndex++, hexToByteArray(line))
+                     } catch (e: Exception) {
+                         // Ignore invalid lines (headers etc)
+                     }
+                }
+            }
+            val bambuCard = getBambuFilament(card)
+            addBambuFilament(bambuCard)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(baseContext, "MCT文件解析失败", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -594,6 +629,64 @@ class MainActivity : BaseNfcAppCompatActivity() {
         updateList()
     }
 
+    fun handleZipFile(uri: Uri) {
+        Thread {
+            try {
+                contentResolver.openInputStream(uri)?.use { inputStream ->
+                    java.util.zip.ZipInputStream(inputStream).use { zipInputStream ->
+                        var entry = zipInputStream.nextEntry
+                        var successCount = 0
+                        var failCount = 0
+                        
+                        while (entry != null) {
+                            if (!entry.isDirectory) {
+                                val name = entry.name
+                                Log.d("ZipImport", "Processing entry: $name")
+                                
+                                // Read entry content to byte array to avoid closing the ZipInputStream via wrappers
+                                val buffer = ByteArrayOutputStream()
+                                val data = ByteArray(1024)
+                                var count: Int
+                                while (zipInputStream.read(data).also { count = it } != -1) {
+                                    buffer.write(data, 0, count)
+                                }
+                                val bytes = buffer.toByteArray()
+                                
+                                runCatching {
+                                    if (name.endsWith(".bin", ignoreCase = true)) {
+                                        if (bytes.size.toLong() == 1024L || bytes.size.toLong() == 4096L) { // Basic size check
+                                             processBinData(bytes)
+                                             successCount++
+                                        }
+                                    } else if (name.endsWith(".mct", ignoreCase = true)) {
+                                        // Wrap bytes in stream for Mct processor
+                                        processMctStream(java.io.ByteArrayInputStream(bytes))
+                                        successCount++
+                                    }
+                                }.onFailure {
+                                    failCount++
+                                    it.printStackTrace()
+                                }
+                            }
+                            zipInputStream.closeEntry()
+                            entry = zipInputStream.nextEntry
+                        }
+                        
+                        runOnUiThread {
+                             Toast.makeText(baseContext, "ZIP导入完成: 成功 $successCount, 失败 $failCount", Toast.LENGTH_LONG).show()
+                             updateList()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+                runOnUiThread {
+                    Toast.makeText(baseContext, "ZIP读取失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+    }
+    
     /**
      * 将十六进制字符串转换为ByteArray
      * @param hex 十六进制字符串（支持大小写，长度必须为偶数）
