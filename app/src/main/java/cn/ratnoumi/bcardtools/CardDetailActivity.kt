@@ -16,7 +16,7 @@ import cn.ratnoumi.bcardtools.drive.bambu.bambuKdf
 import cn.ratnoumi.bcardtools.drive.mifare.defaultKeys
 import cn.ratnoumi.bcardtools.drive.mifare.findMifareSectorKeyA
 import cn.ratnoumi.bcardtools.drive.mifare.findMifareSectorKeyB
-import com.zkhg.seatbeltlock.dao.BambuFilamentDao
+import cn.ratnoumi.bcardtools.dao.BambuFilamentDao
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

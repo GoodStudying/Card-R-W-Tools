@@ -1,4 +1,4 @@
-package com.zkhg.seatbeltlock.dao
+package cn.ratnoumi.bcardtools.dao
 
 import android.content.ContentValues
 import android.content.Context
