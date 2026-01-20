@@ -101,6 +101,25 @@
                     android:lineSpacingMultiplier="1.1"
                     android:textColor="@android:color/darker_gray"/>
 
+            <!-- GitHub Project Link -->
+            <TextView
+                    android:id="@+id/githubLink"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="GitHub 项目主页"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="20dp"
+                    android:gravity="center_vertical"
+                    android:drawablePadding="10dp"
+                    app:drawableStartCompat="@drawable/ic_github"
+                    android:drawableTint="@color/black"
+                    android:textColor="@android:color/black"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:background="?attr/selectableItemBackground"/>
+
+
         </LinearLayout>
         <Button
                 android:text="确认"
