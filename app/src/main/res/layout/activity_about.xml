@@ -28,6 +28,17 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 app:layout_constraintTop_toBottomOf="@+id/titleView">
+            
+            <!-- 版本号 -->
+            <TextView
+                android:id="@+id/versionText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Version: 1.0.0"
+                android:textSize="14sp"
+                android:textAlignment="center"
+                android:layout_marginBottom="20dp"
+                android:textColor="@android:color/darker_gray"/>
 
             <!-- 标题 -->
             <TextView
@@ -118,6 +129,24 @@
                     android:clickable="true"
                     android:focusable="true"
                     android:background="?attr/selectableItemBackground"/>
+
+            <!-- Check Update Button -->
+            <TextView
+                android:id="@+id/checkUpdateBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="检查更新"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginTop="20dp"
+                android:gravity="center_vertical"
+                android:drawablePadding="10dp"
+                android:drawableStart="@drawable/ic_refresh"
+                android:drawableTint="@color/black"
+                android:textColor="@android:color/black"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground"/>
 
 
         </LinearLayout>

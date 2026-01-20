@@ -12,6 +12,7 @@ import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
 import androidx.appcompat.app.AlertDialog
+import android.widget.Toast
 
 
 class AboutActivity : AppCompatActivity() {
@@ -32,10 +33,25 @@ class AboutActivity : AppCompatActivity() {
             startActivity(intent)
         }
         
-        checkForUpdates()
+        binding.checkUpdateBtn.setOnClickListener {
+            checkForUpdates(isManual = true)
+        }
+        
+        // Auto check (silent)
+        checkForUpdates(isManual = false)
+
+        try {
+            val packageInfo = packageManager.getPackageInfo(packageName, 0)
+            binding.versionText.text = "Version: ${packageInfo.versionName}"
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
-    private fun checkForUpdates() {
+    private fun checkForUpdates(isManual: Boolean) {
+        if (isManual) {
+            Toast.makeText(this, "正在检查更新...", Toast.LENGTH_SHORT).show()
+        }
         Thread {
             try {
                 val url = URL("https://api.github.com/repos/GoodStudying/Bambu-Card-Tools/releases/latest")
@@ -74,10 +90,23 @@ class AboutActivity : AppCompatActivity() {
                                 .setNegativeButton("取消", null)
                                 .show()
                         }
+                    } else if (isManual) {
+                        runOnUiThread {
+                            Toast.makeText(this, "当前已是最新版本", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                } else if (isManual) {
+                     runOnUiThread {
+                        Toast.makeText(this, "检查失败: HTTP ${connection.responseCode}", Toast.LENGTH_SHORT).show()
                     }
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
+                if (isManual) {
+                    runOnUiThread {
+                        Toast.makeText(this, "检查失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }.start()
     }

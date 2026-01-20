@@ -13,8 +13,8 @@ android {
         applicationId = "cn.ratnoumi.bcardtools"
         minSdk = 28
         targetSdk = 36
-        versionCode = 4
-        versionName = "1.2.7"
+        versionCode = 6
+        versionName = "1.2.9"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
