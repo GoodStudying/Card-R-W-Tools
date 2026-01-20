@@ -37,7 +37,7 @@ jobs:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-      run: ./gradlew assembleRelease
+      run: ./gradlew assembleRelease assembleDebug
 
     - name: Rename APK
       id: rename_apk
@@ -49,24 +49,32 @@ jobs:
           VERSION="manual-build"
         fi
         
-        NEW_NAME="BCardTools_${VERSION}.apk"
-        # Move and Rename
-        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/$NEW_NAME
+        # 1. Rename Release APK
+        RELEASE_NAME="BCardTools_${VERSION}.apk"
+        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/$RELEASE_NAME
         
-        # Save name for next steps
-        echo "apk_name=$NEW_NAME" >> $GITHUB_OUTPUT
-        echo "apk_path=app/build/outputs/apk/release/$NEW_NAME" >> $GITHUB_OUTPUT
+        # 2. Rename Debug (Beta) APK
+        BETA_NAME="BCardTools_${VERSION}_Beta.apk"
+        mv app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/$BETA_NAME
+        
+        # Output paths
+        echo "apk_path_release=app/build/outputs/apk/release/$RELEASE_NAME" >> $GITHUB_OUTPUT
+        echo "apk_path_beta=app/build/outputs/apk/debug/$BETA_NAME" >> $GITHUB_OUTPUT
 
-    - name: Upload APK
+    - name: Upload APKs
       uses: actions/upload-artifact@v4
       with:
-        name: ${{ steps.rename_apk.outputs.apk_name }}
-        path: ${{ steps.rename_apk.outputs.apk_path }}
+        name: BCardTools_APKs
+        path: |
+          ${{ steps.rename_apk.outputs.apk_path_release }}
+          ${{ steps.rename_apk.outputs.apk_path_beta }}
 
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
         body_path: RELEASE_NOTES.txt
-        files: ${{ steps.rename_apk.outputs.apk_path }}
+        files: |
+          ${{ steps.rename_apk.outputs.apk_path_release }}
+          ${{ steps.rename_apk.outputs.apk_path_beta }}
         token: ${{ secrets.GITHUB_TOKEN }}
