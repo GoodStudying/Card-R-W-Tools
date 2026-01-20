@@ -1,11 +1,10 @@
 name: Android Release
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "main" ]
     tags:
       - 'v*'
-  workflow_dispatch:
 
 jobs:
   build:
@@ -40,15 +39,34 @@ jobs:
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       run: ./gradlew assembleRelease
 
+    - name: Rename APK
+      id: rename_apk
+      run: |
+        # Determine version name
+        if [[ $GITHUB_REF == refs/tags/* ]]; then
+          VERSION=${GITHUB_REF#refs/tags/}
+        else
+          VERSION="manual-build"
+        fi
+        
+        NEW_NAME="BCardTools_${VERSION}.apk"
+        # Move and Rename
+        mv app/build/outputs/apk/release/app-release.apk app/build/outputs/apk/release/$NEW_NAME
+        
+        # Save name for next steps
+        echo "apk_name=$NEW_NAME" >> $GITHUB_OUTPUT
+        echo "apk_path=app/build/outputs/apk/release/$NEW_NAME" >> $GITHUB_OUTPUT
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: app-release
-        path: app/build/outputs/apk/release/app-release.apk
+        name: ${{ steps.rename_apk.outputs.apk_name }}
+        path: ${{ steps.rename_apk.outputs.apk_path }}
 
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
-        files: app/build/outputs/apk/release/app-release.apk
-        generate_release_notes: true
+        body_path: RELEASE_NOTES.txt
+        files: ${{ steps.rename_apk.outputs.apk_path }}
+        token: ${{ secrets.GITHUB_TOKEN }}
