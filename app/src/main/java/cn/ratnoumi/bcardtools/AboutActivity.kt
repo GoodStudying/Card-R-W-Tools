@@ -60,7 +60,7 @@ class AboutActivity : AppCompatActivity() {
                     
                     // 获取当前版本
                     val packageInfo = packageManager.getPackageInfo(packageName, 0)
-                    val currentVersion = packageInfo.versionName
+                    val currentVersion = packageInfo.versionName ?: ""
                     
                     if (isNewerVersion(tagName, currentVersion)) {
                         runOnUiThread {
@@ -98,6 +98,5 @@ class AboutActivity : AppCompatActivity() {
             return false
         }
         return false
-
-
+    }
 }
