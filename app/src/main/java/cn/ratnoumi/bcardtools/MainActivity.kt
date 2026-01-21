@@ -29,7 +29,7 @@ import cn.ratnoumi.bcardtools.databinding.ActivityMainBinding
 import cn.ratnoumi.bcardtools.drive.bambu.BambuFilamentCard
 import cn.ratnoumi.bcardtools.drive.bambu.bambuKdf
 import cn.ratnoumi.bcardtools.drive.bambu.getBambuFilament
-import cn.ratnoumi.bcardtools.drive.bambu.getBambuFilament
+
 import cn.ratnoumi.bcardtools.drive.mifare.MifareCard
 import cn.ratnoumi.bcardtools.drive.mifare.findMifareSectorKeyA
 import cn.ratnoumi.bcardtools.drive.mifare.findMifareSectorKeyB
@@ -363,8 +363,6 @@ class MainActivity : BaseNfcAppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-        // 初始化搜索框
-        initSearchView()
 
         val sp = getSharedPreferences("app_config", Context.MODE_PRIVATE)
         if (!sp.getBoolean("about_skip", false)) {
@@ -380,6 +378,9 @@ class MainActivity : BaseNfcAppCompatActivity() {
                 bambuFilamentDao.delete(it.uid)
                 updateList()
             })
+
+        // 初始化搜索框 (必须在 adapter 初始化之后)
+        initSearchView()
 
         updateList()
         binding.cardRecyclerView.adapter = cardItemAdapter

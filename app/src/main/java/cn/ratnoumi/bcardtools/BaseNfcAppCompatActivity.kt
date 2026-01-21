@@ -9,7 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 abstract class BaseNfcAppCompatActivity : AppCompatActivity() {
     lateinit var pendingIntent: PendingIntent
-    lateinit var nfcAdapter: NfcAdapter
+    var nfcAdapter: NfcAdapter? = null
 
     /**
      * onNewIntent 事件的转发
@@ -22,7 +22,7 @@ abstract class BaseNfcAppCompatActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         nfcAdapter = NfcAdapter.getDefaultAdapter(this)
-        if (!nfcAdapter.isEnabled) {
+        if (nfcAdapter != null && !nfcAdapter!!.isEnabled) {
             startActivity(Intent(Settings.ACTION_NFC_SETTINGS));
         }
         // 创建 PendingIntent
@@ -37,7 +37,7 @@ abstract class BaseNfcAppCompatActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         try {
-            nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null)
+            nfcAdapter?.enableForegroundDispatch(this, pendingIntent, null, null)
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
@@ -46,7 +46,7 @@ abstract class BaseNfcAppCompatActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         try {
-            nfcAdapter.disableForegroundDispatch(this)
+            nfcAdapter?.disableForegroundDispatch(this)
         } catch (e: java.lang.Exception) {
             e.printStackTrace()
         }
