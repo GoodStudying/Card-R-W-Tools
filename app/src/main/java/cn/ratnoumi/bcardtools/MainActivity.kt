@@ -84,7 +84,7 @@ class MainActivity : BaseNfcAppCompatActivity() {
     // 新增：筛选卡片列表
     @SuppressLint("NotifyDataSetChanged")
     private fun filterCards() {
-        filteredCards.clear()
+
 
         val result = cards.filter { card ->
             // 分类筛选
