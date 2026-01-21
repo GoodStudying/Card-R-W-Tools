@@ -61,7 +61,7 @@ class MainActivity : BaseNfcAppCompatActivity() {
 
     private var displayedItems = listOf<CardItem>() // 用于显示的列表 (分组后)
     private var currentCategory: String? = null // 当前选中的分类
-    private lateinit var searchText: String // 当前搜索文本
+    private var searchText: String = "" // 当前搜索文本
 
 
     // 移除旧的 onCategoryClick，Chip 自带点击监听
