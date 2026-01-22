@@ -93,11 +93,12 @@ jobs:
       - name: Create Gitee Release and Upload
         uses: nicennnnnnnlee/action-gitee-release@v2.0.0
         with:
-          token: ${{ secrets.GITEE_TOKEN }}
-          owner: ${{ secrets.GITEE_USER }}
-          repo: Bambu-Card-Tools
-          tag_name: ${{ github.ref_name }}
-          name: ${{ github.ref_name }}
-          body: "Synced release from GitHub Actions."
-          files: |
+          gitee_action: create_release
+          gitee_token: ${{ secrets.GITEE_TOKEN }}
+          gitee_owner: ${{ secrets.GITEE_USER }}
+          gitee_repo: Bambu-Card-Tools
+          gitee_tag_name: ${{ github.ref_name }}
+          gitee_release_name: ${{ github.ref_name }}
+          gitee_release_body: "Synced release from GitHub Actions."
+          gitee_files: |
             app/build/outputs/apk/release/*.apk
