@@ -13,8 +13,10 @@ android {
         applicationId = "cn.ratnoumi.bcardtools"
         minSdk = 28
         targetSdk = 36
-        versionCode = 10
-        versionName = "1.3.3"
+        // 自动计算 versionCode (基于 git commit 数量)
+        versionCode = getGitCommitCount()
+        // 优先使用环境变量中的 VERSION_NAME (CI/CD 传入)，否则使用默认值
+        versionName = System.getenv("VERSION_NAME") ?: "1.0.0-dev"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -74,4 +76,16 @@ dependencies {
     // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
     implementation("org.bouncycastle:bcprov-jdk18on:1.82")
     implementation("com.google.code.gson:gson:2.8.9")
+}
+
+fun getGitCommitCount(): Int {
+    return try {
+        val process = ProcessBuilder("git", "rev-list", "--count", "HEAD")
+            .redirectErrorStream(true)
+            .start()
+        process.inputStream.bufferedReader().readText().trim().toInt()
+    } catch (e: Exception) {
+        println("Git commit count failed: ${e.message}")
+        10
+    }
 }

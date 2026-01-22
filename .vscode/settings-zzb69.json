@@ -1,0 +1,5 @@
+{
+    "github-actions.workflows.pinned.workflows": [
+        "Bambu-Card-Tools/.github/workflows/android_release.yml"
+    ]
+}
