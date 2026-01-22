@@ -91,7 +91,7 @@ jobs:
           path: app/build/outputs/apk/release/
 
       - name: Create Gitee Release and Upload
-        uses: nicennnnnnnlee/action-gitee-release@v1.2.3
+        uses: nicennnnnnnlee/action-gitee-release@v2.0.0
         with:
           token: ${{ secrets.GITEE_TOKEN }}
           owner: ${{ secrets.GITEE_USER }}
