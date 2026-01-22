@@ -16,7 +16,7 @@ android {
         // 自动计算 versionCode (基于 git commit 数量)
         versionCode = getGitCommitCount()
         // 优先使用环境变量中的 VERSION_NAME (CI/CD 传入)，否则使用默认值
-        versionName = System.getenv("VERSION_NAME") ?: "1.0.0-dev"
+        versionName = System.getenv("VERSION_NAME") ?: "1.3.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
