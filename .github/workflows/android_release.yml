@@ -77,4 +77,27 @@ jobs:
         files: |
           ${{ steps.rename_apk.outputs.apk_path_release }}
           ${{ steps.rename_apk.outputs.apk_path_beta }}
-        token: ${{ secrets.GITHUB_TOKEN }}
+  release_to_gitee:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: BCardTools_APKs
+          path: app/build/outputs/apk/release/
+
+      - name: Create Gitee Release and Upload
+        uses: nicennnnnnnlee/action-gitee-release@v1.2.3
+        with:
+          token: ${{ secrets.GITEE_TOKEN }}
+          owner: ${{ secrets.GITEE_USER }}
+          repo: Bambu-Card-Tools
+          tag_name: ${{ github.ref_name }}
+          name: ${{ github.ref_name }}
+          body: "Synced release from GitHub Actions."
+          files: |
+            app/build/outputs/apk/release/*.apk
