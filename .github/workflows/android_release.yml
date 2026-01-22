@@ -88,7 +88,13 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: BCardTools_APKs
-          path: app/build/outputs/apk/release/
+          path: build_artifacts
+
+      - name: Prepare Assets
+        run: |
+          mkdir release_assets
+          find build_artifacts -name "*.apk" -exec cp {} release_assets/ \;
+          ls -R release_assets
 
       - name: Create Gitee Release and Upload
         uses: nicennnnnnnlee/action-gitee-release@v2.0.0
@@ -101,5 +107,4 @@ jobs:
           gitee_tag_name: ${{ github.ref_name }}
           gitee_release_name: ${{ github.ref_name }}
           gitee_release_body: "Synced release from GitHub Actions."
-          gitee_files: |
-            app/build/outputs/apk/release/*.apk
+          gitee_files: release_assets/*
