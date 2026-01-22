@@ -97,6 +97,7 @@ jobs:
           gitee_token: ${{ secrets.GITEE_TOKEN }}
           gitee_owner: ${{ secrets.GITEE_USER }}
           gitee_repo: Bambu-Card-Tools
+          gitee_target_commitish: ${{ github.sha }}
           gitee_tag_name: ${{ github.ref_name }}
           gitee_release_name: ${{ github.ref_name }}
           gitee_release_body: "Synced release from GitHub Actions."
