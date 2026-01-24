@@ -18,6 +18,11 @@ android {
         // 优先使用环境变量中的 VERSION_NAME (CI/CD 传入)，否则使用默认值
         versionName = System.getenv("VERSION_NAME") ?: "1.3.4"
 
+        // 动态设置应用名称：正式版显示 "BCardTools"，非正式版显示 "BCardTools (Beta)"
+        val isReleaseEnv = System.getenv("IS_RELEASE") == "true"
+        val appName = if (isReleaseEnv) "BCardTools" else "BCardTools (Beta)"
+        resValue("string", "app_name", appName)
+
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -47,7 +52,7 @@ android {
         }
         debug {
             applicationIdSuffix = ".beta"
-            resValue("string", "app_name", "BCardTools (Beta)")
+            // app_name 由 defaultConfig 统一管理
             signingConfig = signingConfigs.getByName("release")
         }
     }
@@ -76,6 +81,7 @@ dependencies {
     // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on
     implementation("org.bouncycastle:bcprov-jdk18on:1.82")
     implementation("com.google.code.gson:gson:2.8.9")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
 }
 
 fun getGitCommitCount(): Int {

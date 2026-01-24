@@ -301,6 +301,50 @@ class MainActivity : BaseNfcAppCompatActivity() {
             updateList()
         }
 
+    private fun handleCardItemClick(item: CardItem) {
+        if (item.count > 1) {
+            showGroupDialog(item)
+        } else {
+            startActivityCardDetail(item.card)
+        }
+    }
+
+    private fun showGroupDialog(groupItem: CardItem) {
+        val groupCards = cards.filter {
+            it.detailedFilamentType == groupItem.card.detailedFilamentType &&
+            it.color == groupItem.card.color
+        }
+
+        val cardItems = groupCards.map { CardItem(it, 1) }
+
+        val view = layoutInflater.inflate(R.layout.dialog_card_list, null)
+        val recyclerView = view.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.dialogRecyclerView)
+
+        val dialog = androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("${groupItem.card.detailedFilamentType} (${groupItem.count})")
+            .setView(view)
+            .setPositiveButton("关闭", null)
+            .create()
+
+        val adapter = CardItemAdapter(
+            cardItems,
+            onItemClick = {
+                dialog.dismiss()
+                startActivityCardDetail(it.card)
+            },
+            onDelete = { card ->
+                bambuFilamentDao.delete(card.uid)
+                updateList()
+                dialog.dismiss()
+            }
+        )
+
+        recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.adapter = adapter
+
+        dialog.show()
+    }
+
     // 跳转到卡片详情页面
     fun startActivityCardDetail(card: BambuFilamentCard) {
         val intent = Intent(this, CardDetailActivity::class.java)
@@ -373,7 +417,9 @@ class MainActivity : BaseNfcAppCompatActivity() {
         // 初始化适配器，使用筛选后的列表
         cardItemAdapter = CardItemAdapter(
             displayedItems,
-            onItemClick = { startActivityCardDetail(it) },
+        cardItemAdapter = CardItemAdapter(
+            displayedItems,
+            onItemClick = { handleCardItemClick(it) },
             onDelete = {
                 bambuFilamentDao.delete(it.uid)
                 updateList()
@@ -419,6 +465,11 @@ class MainActivity : BaseNfcAppCompatActivity() {
 
             R.id.action_export -> {
                 checkStoragePermission()
+                true
+            }
+
+            R.id.action_sync -> {
+                startActivity(Intent(this, SyncActivity::class.java))
                 true
             }
 

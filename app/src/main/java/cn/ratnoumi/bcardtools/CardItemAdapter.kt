@@ -16,7 +16,7 @@ data class CardItem(
 
 class CardItemAdapter(
     var items: List<CardItem>,
-    val onItemClick: (BambuFilamentCard) -> Unit,
+    val onItemClick: (CardItem) -> Unit,
     val onDelete: (BambuFilamentCard) -> Unit
 ) :
     RecyclerView.Adapter<CardItemAdapter.ViewHolder>() {
@@ -44,7 +44,7 @@ class CardItemAdapter(
         holder.filamentColorText.text = "#${Integer.toHexString(card.color).uppercase()}"
         holder.filamentColorIndicator.setBackgroundColor(card.color)
         holder.itemView.setOnClickListener {
-            onItemClick(card)
+            onItemClick(item)
         }
         holder.itemView.setOnLongClickListener {
             showDeleteDialog(holder.itemView.context, position)

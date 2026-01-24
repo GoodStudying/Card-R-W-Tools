@@ -48,6 +48,10 @@
         <activity
                 android:name=".AboutActivity"
                 android:exported="false"/>
+        <activity
+                android:name=".SyncActivity"
+                android:exported="false"
+                android:label="WebDAV 同步"/>
     </application>
 
 </manifest>
