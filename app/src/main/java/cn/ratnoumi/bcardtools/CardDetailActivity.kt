@@ -165,6 +165,7 @@ class CardDetailActivity : BaseNfcAppCompatActivity() {
             binding.materialIDText.text = "${info.materialID}/${info.materialVariantID}"
             binding.productionDateText.text = info.productionDate
             binding.filamentTypeText.text = info.detailedFilamentType
+            binding.colorNameText.text = info.colorName
             binding.filamentColorText.text = "#${Integer.toHexString(info.color).uppercase()}"
             binding.filamentDiameterText.text = "${info.filamentDiameter} mm"
             binding.filamentLengthText.text = "${info.filamentLength} 米"

@@ -41,6 +41,7 @@ class CardItemAdapter(
         holder.spoolWeightText.text = "${card.spoolWeight}g"
         holder.filamentLengthText.text = "${card.filamentLength}米"
         holder.productionDate.text = card.productionDate
+        holder.colorNameText.text = card.colorName
         holder.filamentColorText.text = "#${Integer.toHexString(card.color).uppercase()}"
         holder.filamentColorIndicator.setBackgroundColor(card.color)
         holder.itemView.setOnClickListener {
@@ -81,5 +82,6 @@ class CardItemAdapter(
         val productionDate: TextView = itemView.findViewById(R.id.productionDateText)
         val filamentColorText: TextView = itemView.findViewById(R.id.filamentColorText)
         val filamentColorIndicator: TextView = itemView.findViewById(R.id.filamentColorIndicator)
+        val colorNameText: TextView = itemView.findViewById(R.id.colorNameText)
     }
 }

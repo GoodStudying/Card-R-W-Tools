@@ -12,7 +12,7 @@ import kotlin.concurrent.Volatile
  * @version 1.0
  * @date 2020/5/23 10:51
  */
-class SQLiteHelper(context: Context?) : SQLiteOpenHelper(context, "SeatBeltLock", null, 1) {
+class SQLiteHelper(context: Context?) : SQLiteOpenHelper(context, "SeatBeltLock", null, 2) {
     override fun onCreate(db: SQLiteDatabase) {
         Log.d("SQLiteHelper", "onCreate: ")
         for (sql in createTableSql.values) {
@@ -22,7 +22,20 @@ class SQLiteHelper(context: Context?) : SQLiteOpenHelper(context, "SeatBeltLock"
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        Log.d("SQLiteHelper", "onUpgrade: ")
+        Log.d("SQLiteHelper", "onUpgrade: oldVersion=$oldVersion, newVersion=$newVersion")
+        if (oldVersion < 2) {
+            try {
+                // 升级到版本2：增加 colorName 字段
+                db.execSQL("ALTER TABLE ${BambuFilamentDao.TABLE_NAME} ADD COLUMN colorName TEXT")
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // 如果升级失败，回退到删除表重建的逻辑（虽然会丢失数据，但能保证应用可用）
+                dropAndRecreate(db)
+            }
+        }
+    }
+
+    private fun dropAndRecreate(db: SQLiteDatabase) {
         // drop 掉所有表
         val tableNames = createTableSql.keys.iterator()
         while (tableNames.hasNext()) {

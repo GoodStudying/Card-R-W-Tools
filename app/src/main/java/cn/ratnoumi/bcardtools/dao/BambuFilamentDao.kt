@@ -20,6 +20,7 @@ class BambuFilamentDao(context: Context) : BaseDao<BambuFilamentCard, String>(co
                     "\tfilamentType TEXT,\n" +
                     "\tdetailedFilamentType TEXT,\n" +
                     "\tcolor INTEGER,\n" +
+                    "\tcolorName TEXT,\n" +
                     "\tspoolWeight INTEGER,\n" +
                     "\tfilamentDiameter REAL,\n" +
                     "\tdryingTemperature INTEGER,\n" +
@@ -47,6 +48,7 @@ class BambuFilamentDao(context: Context) : BaseDao<BambuFilamentCard, String>(co
                 getColumnString(it, "filamentType") ?: "",
                 getColumnString(it, "detailedFilamentType") ?: "",
                 getColumnInt(it, "color"),
+                getColumnString(it, "colorName") ?: "",
                 getColumnInt(it, "spoolWeight"),
                 getColumnFloat(it, "filamentDiameter"),
                 getColumnInt(it, "dryingTemperature"),
@@ -74,6 +76,7 @@ class BambuFilamentDao(context: Context) : BaseDao<BambuFilamentCard, String>(co
         addContentValues(cv, "filamentType", bean?.filamentType)
         addContentValues(cv, "detailedFilamentType", bean?.detailedFilamentType)
         addContentValues(cv, "color", bean?.color)
+        addContentValues(cv, "colorName", bean?.colorName)
         addContentValues(cv, "spoolWeight", bean?.spoolWeight)
         addContentValues(cv, "filamentDiameter", bean?.filamentDiameter)
         addContentValues(cv, "dryingTemperature", bean?.dryingTemperature)

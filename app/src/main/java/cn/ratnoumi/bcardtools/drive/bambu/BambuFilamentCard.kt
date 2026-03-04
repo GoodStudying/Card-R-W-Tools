@@ -14,6 +14,7 @@ data class BambuFilamentCard(
     val filamentType: String,           // 耗材类型
     val detailedFilamentType: String,   // 详细耗材类型
     val color: Int,                   // 耗材颜色
+    val colorName: String,            // 色号名称
     val spoolWeight: Int,               // 线轴重量
     val filamentDiameter: Float,        // 耗材直径
     val dryingTemperature: Int,         // 干燥温度
@@ -67,6 +68,7 @@ data class BambuFilamentCard(
         dest.writeString(filamentType)
         dest.writeString(detailedFilamentType)
         dest.writeInt(color)
+        dest.writeString(colorName)
         dest.writeInt(spoolWeight)
         dest.writeFloat(filamentDiameter)
         dest.writeInt(dryingTemperature)

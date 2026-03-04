@@ -96,6 +96,7 @@ class MainActivity : BaseNfcAppCompatActivity() {
                     card.detailedFilamentType.contains(searchText, ignoreCase = true) ||
                     card.uid.contains(searchText, ignoreCase = true) ||
                     card.materialID.contains(searchText, ignoreCase = true) ||
+                    card.colorName.contains(searchText, ignoreCase = true) ||
                     // 新增：颜色筛选（文本匹配）
                     Integer.toHexString(card.color).contains(searchText, ignoreCase = true) ||
                     // 新增：耗材重量筛选（数值转字符串后匹配，支持搜索重量数字）
