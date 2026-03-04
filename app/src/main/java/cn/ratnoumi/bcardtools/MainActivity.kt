@@ -56,8 +56,6 @@ import java.util.*
 import java.net.HttpURLConnection
 import java.net.URL
 import org.json.JSONObject
-import java.io.BufferedReader
-import java.io.InputStreamReader
 
 class MainActivity : BaseNfcAppCompatActivity() {
     private val cards = mutableListOf<BambuFilamentCard>()
@@ -776,10 +774,7 @@ class MainActivity : BaseNfcAppCompatActivity() {
             filamentType.contains("PC", ignoreCase = true) -> "GFZ01"
             else -> "GFA01"
         }
-        val mifareCard = MifareCard(
-            uid = uid,
-            sectors = mutableListOf()
-        )
+        val mifareCard = MifareCard(MifareClassic.SIZE_1K)
         return BambuFilamentCard(
             uid = uid,
             materialVariantID = "",
