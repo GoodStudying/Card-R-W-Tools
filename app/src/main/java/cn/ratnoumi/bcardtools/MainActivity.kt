@@ -418,8 +418,6 @@ class MainActivity : BaseNfcAppCompatActivity() {
         // 初始化适配器，使用筛选后的列表
         cardItemAdapter = CardItemAdapter(
             displayedItems,
-        cardItemAdapter = CardItemAdapter(
-            displayedItems,
             onItemClick = { handleCardItemClick(it) },
             onDelete = {
                 bambuFilamentDao.delete(it.uid)

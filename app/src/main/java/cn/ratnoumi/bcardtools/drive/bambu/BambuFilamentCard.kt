@@ -38,6 +38,7 @@ data class BambuFilamentCard(
         filamentType = parcel.readString() ?: "",
         detailedFilamentType = parcel.readString() ?: "",
         color = parcel.readInt(),
+        colorName = parcel.readString() ?: "",
         spoolWeight = parcel.readInt(),
         filamentDiameter = parcel.readFloat(),
         dryingTemperature = parcel.readInt(),
