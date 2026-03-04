@@ -11,6 +11,10 @@
           android:title="导入"
           android:orderInCategory="100"
           app:showAsAction="never"/>
+    <item android:id="@+id/action_import_clipboard"
+          android:title="从剪贴板导入"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
     <item android:id="@+id/action_export"
           android:title="导出"
           android:orderInCategory="100"

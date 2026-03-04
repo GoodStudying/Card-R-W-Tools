@@ -2,6 +2,8 @@ package cn.ratnoumi.bcardtools
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -51,6 +53,11 @@ import java.nio.file.Paths
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
+import java.net.HttpURLConnection
+import java.net.URL
+import org.json.JSONObject
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 class MainActivity : BaseNfcAppCompatActivity() {
     private val cards = mutableListOf<BambuFilamentCard>()
@@ -434,6 +441,197 @@ class MainActivity : BaseNfcAppCompatActivity() {
         binding.toolbar.setOnClickListener {
             updateList()
         }
+
+        checkForUpdatesOnStart()
+    }
+
+    private fun checkForUpdatesOnStart() {
+        Thread {
+            try {
+                val sp = getSharedPreferences("app_config", Context.MODE_PRIVATE)
+                val lastCheckTime = sp.getLong("last_update_check", 0)
+                val currentTime = System.currentTimeMillis()
+                val sixHours = 6 * 60 * 60 * 1000L
+
+                if (currentTime - lastCheckTime < sixHours) {
+                    return@Thread
+                }
+
+                sp.edit().putLong("last_update_check", currentTime).apply()
+
+                val url = URL("https://gitee.com/api/v5/repos/GoodStudying/Bambu-Card-Tools/releases/latest")
+                val connection = url.openConnection() as HttpURLConnection
+                connection.requestMethod = "GET"
+                connection.connectTimeout = 8000
+                connection.readTimeout = 8000
+
+                if (connection.responseCode == 200) {
+                    val stream = connection.inputStream
+                    val reader = BufferedReader(InputStreamReader(stream))
+                    val response = StringBuilder()
+                    var line: String?
+                    while (reader.readLine().also { line = it } != null) {
+                        response.append(line)
+                    }
+                    reader.close()
+
+                    val json = JSONObject(response.toString())
+                    val tagName = json.getString("tag_name")
+                    val htmlUrl = json.getString("html_url")
+
+                    var downloadUrl = ""
+                    if (json.has("assets")) {
+                        val assets = json.getJSONArray("assets")
+                        for (i in 0 until assets.length()) {
+                            val asset = assets.getJSONObject(i)
+                            val name = asset.getString("name")
+                            if (name.endsWith(".apk", true)) {
+                                downloadUrl = asset.getString("browser_download_url")
+                                if (name.contains("release", true)) {
+                                    break
+                                }
+                            }
+                        }
+                    }
+
+                    val packageInfo = packageManager.getPackageInfo(packageName, 0)
+                    val currentVersion = packageInfo.versionName ?: ""
+
+                    if (isNewerVersion(tagName, currentVersion)) {
+                        runOnUiThread {
+                            androidx.appcompat.app.AlertDialog.Builder(this)
+                                .setTitle("发现新版本 $tagName")
+                                .setMessage("当前版本: $currentVersion\n最新版本: $tagName\n\n是否下载安装？")
+                                .setPositiveButton("立即更新") { _, _ ->
+                                    if (downloadUrl.isNotEmpty()) {
+                                        downloadApk(downloadUrl)
+                                    } else {
+                                        Toast.makeText(this, "未找到安装包，即将前往网页下载", Toast.LENGTH_SHORT).show()
+                                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(htmlUrl))
+                                        startActivity(intent)
+                                    }
+                                }
+                                .setNegativeButton("稍后", null)
+                                .show()
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }.start()
+    }
+
+    private fun isNewerVersion(remote: String, local: String): Boolean {
+        try {
+            val v1 = remote.removePrefix("v").split(".")
+            val v2 = local.removePrefix("v").split(".")
+            for (i in 0 until maxOf(v1.size, v2.size)) {
+                val n1 = v1.getOrNull(i)?.toIntOrNull() ?: 0
+                val n2 = v2.getOrNull(i)?.toIntOrNull() ?: 0
+                if (n1 > n2) return true
+                if (n1 < n2) return false
+            }
+            return false
+        } catch (e: Exception) {
+            return false
+        }
+    }
+
+    private fun downloadApk(url: String) {
+        val ll = LinearLayout(this)
+        ll.orientation = LinearLayout.VERTICAL
+        ll.setPadding(50, 50, 50, 50)
+
+        val tv = TextView(this)
+        tv.text = "正在下载..."
+        ll.addView(tv)
+
+        val pb = android.widget.ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal)
+        pb.isIndeterminate = true
+        ll.addView(pb)
+
+        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
+        builder.setTitle("下载中")
+        builder.setView(ll)
+        builder.setCancelable(false)
+        val dialog = builder.create()
+        dialog.show()
+
+        Thread {
+            try {
+                val connection = URL(url).openConnection() as HttpURLConnection
+                connection.connect()
+
+                if (connection.responseCode != HttpURLConnection.HTTP_OK) {
+                    runOnUiThread {
+                        dialog.dismiss()
+                        Toast.makeText(this, "下载服务器错误: ${connection.responseMessage}", Toast.LENGTH_SHORT).show()
+                    }
+                    return@Thread
+                }
+
+                val length = connection.contentLength
+                if (length > 0) {
+                    runOnUiThread {
+                        pb.isIndeterminate = false
+                        pb.max = 100
+                    }
+                }
+
+                val inputStream = java.io.BufferedInputStream(connection.inputStream)
+                val file = java.io.File(getExternalFilesDir(android.os.Environment.DIRECTORY_DOWNLOADS), "update.apk")
+                if (file.exists()) file.delete()
+
+                val outputStream = java.io.FileOutputStream(file)
+                val data = ByteArray(4096)
+                var total: Long = 0
+                var count: Int
+
+                while (inputStream.read(data).also { count = it } != -1) {
+                    total += count
+                    outputStream.write(data, 0, count)
+                    if (length > 0) {
+                        val progress = (total * 100 / length).toInt()
+                        runOnUiThread { pb.progress = progress }
+                    }
+                }
+
+                outputStream.flush()
+                outputStream.close()
+                inputStream.close()
+
+                runOnUiThread {
+                    dialog.dismiss()
+                    installApk(file)
+                }
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+                runOnUiThread {
+                    dialog.dismiss()
+                    Toast.makeText(this, "下载异常: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }.start()
+    }
+
+    private fun installApk(file: java.io.File) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW)
+            val uri = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+            } else {
+                Uri.fromFile(file)
+            }
+            intent.setDataAndType(uri, "application/vnd.android.package-archive")
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(intent)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Toast.makeText(this, "无法启动安装: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -462,6 +660,11 @@ class MainActivity : BaseNfcAppCompatActivity() {
                 true
             }
 
+            R.id.action_import_clipboard -> {
+                importFromClipboard()
+                true
+            }
+
             R.id.action_export -> {
                 checkStoragePermission()
                 true
@@ -475,6 +678,131 @@ class MainActivity : BaseNfcAppCompatActivity() {
 
             else -> super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun importFromClipboard() {
+        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = clipboard.primaryClip
+        if (clip == null || clip.itemCount == 0) {
+            Toast.makeText(this, "剪贴板为空", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val text = clip.getItemAt(0).text?.toString() ?: ""
+        if (text.isBlank()) {
+            Toast.makeText(this, "剪贴板为空", Toast.LENGTH_SHORT).show()
+            return
+        }
+        parseAndImportList(text)
+    }
+
+    private fun parseAndImportList(text: String) {
+        val lines = text.lines().filter { it.isNotBlank() }
+        if (lines.isEmpty()) {
+            Toast.makeText(this, "没有有效数据", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val colorMap = getColorMap()
+        var successCount = 0
+        var skipCount = 0
+        for (line in lines) {
+            val parts = line.split(Regex("[,\t\\s]+")).map { it.trim() }.filter { it.isNotEmpty() }
+            if (parts.size < 3) {
+                skipCount++
+                continue
+            }
+            val filamentType = parts[0]
+            val colorName = parts[1]
+            val colorHex = parts[2]
+            val color = parseColor(colorHex)
+            val matchedColorName = colorMap[filamentType to color] ?: colorName
+            val cardData = createPlaceholderCard(filamentType, matchedColorName, color)
+            if (!bambuFilamentDao.exist(cardData.uid)) {
+                bambuFilamentDao.add(cardData)
+                successCount++
+            } else {
+                skipCount++
+            }
+        }
+        updateList()
+        Toast.makeText(this, "导入成功: $successCount, 跳过: $skipCount", Toast.LENGTH_LONG).show()
+    }
+
+    private fun getColorMap(): Map<Pair<String, Int>, String> {
+        val map = mutableMapOf<Pair<String, Int>, String>()
+        try {
+            val inputStream = assets.open("color_map.txt")
+            val reader = BufferedReader(InputStreamReader(inputStream))
+            reader.forEachLine { line ->
+                val parts = line.split("\t")
+                if (parts.size >= 3) {
+                    val type = parts[0].trim()
+                    val name = parts[1].trim()
+                    val hex = parts[2].trim().removePrefix("#")
+                    val color = parseColor(hex)
+                    map[type to color] = name
+                }
+            }
+            reader.close()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        return map
+    }
+
+    private fun parseColor(hex: String): Int {
+        return try {
+            val cleanHex = hex.removePrefix("#")
+            when (cleanHex.length) {
+                6 -> Integer.parseInt(cleanHex, 16) or 0xFF000000.toInt()
+                8 -> Integer.parseInt(cleanHex, 16)
+                else -> 0
+            }
+        } catch (e: Exception) {
+            0
+        }
+    }
+
+    private fun createPlaceholderCard(filamentType: String, colorName: String, color: Int): BambuFilamentCard {
+        val uid = UUID.randomUUID().toString().replace("-", "").take(8).uppercase()
+        val now = java.time.LocalDateTime.now()
+        val dateStr = now.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"))
+        val materialID = when {
+            filamentType.contains("PLA", ignoreCase = true) -> "GFA01"
+            filamentType.contains("PETG", ignoreCase = true) -> "GFG01"
+            filamentType.contains("ABS", ignoreCase = true) -> "GFB01"
+            filamentType.contains("TPU", ignoreCase = true) -> "GFT01"
+            filamentType.contains("ASA", ignoreCase = true) -> "GFS01"
+            filamentType.contains("PA", ignoreCase = true) -> "GFK01"
+            filamentType.contains("PC", ignoreCase = true) -> "GFZ01"
+            else -> "GFA01"
+        }
+        val mifareCard = MifareCard(
+            uid = uid,
+            sectors = mutableListOf()
+        )
+        return BambuFilamentCard(
+            uid = uid,
+            materialVariantID = "",
+            materialID = materialID,
+            filamentType = filamentType.substringBefore(" ").ifEmpty { "PLA" },
+            detailedFilamentType = filamentType,
+            color = color,
+            colorName = colorName,
+            spoolWeight = 1000,
+            filamentDiameter = 1.75f,
+            dryingTemperature = 55,
+            dryingHours = 8,
+            bedTemperature = 45,
+            maxTemperatureHotend = 230,
+            minTemperatureHotend = 200,
+            xCamInfo = "",
+            minimumNozzleDiameter = 0.4f,
+            trayUID = "",
+            spoolWidth = 0f,
+            productionDate = dateStr,
+            filamentLength = 0,
+            card = mifareCard
+        )
     }
 
     // 选择固件文件 - 支持多选
