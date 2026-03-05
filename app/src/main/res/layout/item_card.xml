@@ -74,8 +74,7 @@
                         android:layout_height="wrap_content"
                         android:text="1000g"
                         android:textSize="13sp"
-                        android:textColor="#888888"
-                        android:drawablePadding="2dp"/>
+                        android:textColor="#888888"/>
 
                 <TextView
                         android:layout_width="wrap_content"
@@ -95,7 +94,7 @@
             </LinearLayout>
 
             <TextView
-                    android:id="@+id/uidText"
+                    android:id="@+id/UIDText"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:text="UID: 15824C0D"
@@ -107,10 +106,33 @@
                     app:layout_constraintStart_toEndOf="@+id/colorIndicator"
                     app:layout_constraintEnd_toStartOf="@+id/colorPreview"/>
 
+            <TextView
+                    android:id="@+id/productionDateText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:text="2024/04/11"
+                    android:textSize="11sp"
+                    android:textColor="#cccccc"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginTop="2dp"
+                    app:layout_constraintTop_toBottomOf="@+id/UIDText"
+                    app:layout_constraintStart_toEndOf="@+id/colorIndicator"
+                    app:layout_constraintEnd_toStartOf="@+id/colorPreview"/>
+
+            <TextView
+                    android:id="@+id/filamentColorText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="#00AE42"
+                    android:textSize="10sp"
+                    android:textColor="#999999"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toTopOf="@+id/colorPreview"/>
+
             <LinearLayout
                     android:id="@+id/colorPreview"
-                    android:layout_width="70dp"
-                    android:layout_height="70dp"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
                     android:orientation="vertical"
                     android:gravity="center"
                     android:background="@drawable/color_preview_bg"
@@ -120,8 +142,8 @@
 
                 <View
                         android:id="@+id/colorBlock"
-                        android:layout_width="50dp"
-                        android:layout_height="50dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:background="#FF00AE42"/>
 
             </LinearLayout>
