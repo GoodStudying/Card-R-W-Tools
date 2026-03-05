@@ -52,6 +52,10 @@
                 android:name=".SyncActivity"
                 android:exported="false"
                 android:label="WebDAV 同步"/>
+        <activity
+                android:name=".BatchBurnActivity"
+                android:exported="false"
+                android:label="批量烧写"/>
     </application>
 
 </manifest>

@@ -2,8 +2,6 @@ package cn.ratnoumi.bcardtools
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -658,11 +656,6 @@ class MainActivity : BaseNfcAppCompatActivity() {
                 true
             }
 
-            R.id.action_import_clipboard -> {
-                importFromClipboard()
-                true
-            }
-
             R.id.action_export -> {
                 checkStoragePermission()
                 true
@@ -680,128 +673,6 @@ class MainActivity : BaseNfcAppCompatActivity() {
 
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    private fun importFromClipboard() {
-        val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = clipboard.primaryClip
-        if (clip == null || clip.itemCount == 0) {
-            Toast.makeText(this, "剪贴板为空", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val text = clip.getItemAt(0).text?.toString() ?: ""
-        if (text.isBlank()) {
-            Toast.makeText(this, "剪贴板为空", Toast.LENGTH_SHORT).show()
-            return
-        }
-        parseAndImportBurnList(text)
-    }
-
-    private fun parseAndImportBurnList(text: String) {
-        val lines = text.lines().filter { it.isNotBlank() }
-        if (lines.isEmpty()) {
-            Toast.makeText(this, "没有有效数据", Toast.LENGTH_SHORT).show()
-            return
-        }
-        val colorMap = getColorMap()
-        var successCount = 0
-        var skipCount = 0
-        for (line in lines) {
-            val parts = line.split(Regex("[,\t\\s]+")).map { it.trim() }.filter { it.isNotEmpty() }
-            if (parts.size < 3) {
-                skipCount++
-                continue
-            }
-            val filamentType = parts[0]
-            val colorName = parts[1]
-            val colorHex = parts[2]
-            val color = parseColor(colorHex)
-            val matchedColorName = colorMap[filamentType to color] ?: colorName
-            val cardData = createPlaceholderCard(filamentType, matchedColorName, color)
-            if (!bambuFilamentDao.exist(cardData.uid)) {
-                bambuFilamentDao.add(cardData)
-                successCount++
-            } else {
-                skipCount++
-            }
-        }
-        updateList()
-        Toast.makeText(this, "导入成功: $successCount, 跳过: $skipCount", Toast.LENGTH_LONG).show()
-    }
-
-    private fun getColorMap(): Map<Pair<String, Int>, String> {
-        val map = mutableMapOf<Pair<String, Int>, String>()
-        try {
-            val inputStream = assets.open("color_map.txt")
-            val reader = BufferedReader(InputStreamReader(inputStream))
-            reader.forEachLine { line ->
-                val parts = line.split("\t")
-                if (parts.size >= 3) {
-                    val type = parts[0].trim()
-                    val name = parts[1].trim()
-                    val hex = parts[2].trim().removePrefix("#")
-                    val color = parseColor(hex)
-                    map[type to color] = name
-                }
-            }
-            reader.close()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        return map
-    }
-
-    private fun parseColor(hex: String): Int {
-        return try {
-            val cleanHex = hex.removePrefix("#")
-            when (cleanHex.length) {
-                6 -> Integer.parseInt(cleanHex, 16) or 0xFF000000.toInt()
-                8 -> Integer.parseInt(cleanHex, 16)
-                else -> 0
-            }
-        } catch (e: Exception) {
-            0
-        }
-    }
-
-    private fun createPlaceholderCard(filamentType: String, colorName: String, color: Int): BambuFilamentCard {
-        val uid = UUID.randomUUID().toString().replace("-", "").take(8).uppercase()
-        val now = java.time.LocalDateTime.now()
-        val dateStr = now.format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd"))
-        val materialID = when {
-            filamentType.contains("PLA", ignoreCase = true) -> "GFA01"
-            filamentType.contains("PETG", ignoreCase = true) -> "GFG01"
-            filamentType.contains("ABS", ignoreCase = true) -> "GFB01"
-            filamentType.contains("TPU", ignoreCase = true) -> "GFT01"
-            filamentType.contains("ASA", ignoreCase = true) -> "GFS01"
-            filamentType.contains("PA", ignoreCase = true) -> "GFK01"
-            filamentType.contains("PC", ignoreCase = true) -> "GFZ01"
-            else -> "GFA01"
-        }
-        val mifareCard = MifareCard(MifareClassic.SIZE_1K)
-        return BambuFilamentCard(
-            uid = uid,
-            materialVariantID = "",
-            materialID = materialID,
-            filamentType = filamentType.substringBefore(" ").ifEmpty { "PLA" },
-            detailedFilamentType = filamentType,
-            color = color,
-            colorName = colorName,
-            spoolWeight = 1000,
-            filamentDiameter = 1.75f,
-            dryingTemperature = 55,
-            dryingHours = 8,
-            bedTemperature = 45,
-            maxTemperatureHotend = 230,
-            minTemperatureHotend = 200,
-            xCamInfo = "",
-            minimumNozzleDiameter = 0.4f,
-            trayUID = "",
-            spoolWidth = 0f,
-            productionDate = dateStr,
-            filamentLength = 0,
-            card = mifareCard
-        )
     }
 
     // 选择固件文件 - 支持多选

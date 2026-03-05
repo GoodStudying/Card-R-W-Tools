@@ -35,6 +35,14 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
+            <Button
+                android:id="@+id/importClipboardBtn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="从剪贴板导入清单"
+                android:layout_marginTop="8dp"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/cardList"
                 android:layout_width="match_parent"
