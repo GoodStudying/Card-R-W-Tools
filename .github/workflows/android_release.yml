@@ -141,14 +141,39 @@ jobs:
           find build_artifacts -name "*.apk" -exec cp {} release_assets/ \;
           ls -R release_assets
 
-      - name: Create Gitee Release and Upload
-        uses: actions-cool/github-to-gitee@v2
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          gitee_token: ${{ secrets.GITEE_TOKEN }}
-          gitee_user: ${{ secrets.GITEE_USER }}
-          gitee_repo: Bambu-Card-Tools
-          sync_branches: true
-          sync_tags: true
-          sync_releases: true
-          sync_release_assets: true
+      - name: Create Gitee Release
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          TAG_NAME="${GITHUB_REF#refs/tags/}"
+          RELEASE_NAME="${TAG_NAME}"
+          
+          # 创建Gitee Release
+          curl -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_USER }}/Bambu-Card-Tools/releases" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"access_token\": \"${GITEE_TOKEN}\",
+              \"tag_name\": \"${TAG_NAME}\",
+              \"name\": \"${RELEASE_NAME}\",
+              \"body\": \"Synced release from GitHub Actions.\",
+              \"target_commitish\": \"main\"
+            }" > release_response.json
+          
+          # 获取Release ID
+          RELEASE_ID=$(cat release_response.json | grep -o '"id":[0-9]*' | head -1 | cut -d':' -f2)
+          echo "RELEASE_ID=$RELEASE_ID" >> $GITHUB_ENV
+
+      - name: Upload Assets to Gitee Release
+        env:
+          GITEE_TOKEN: ${{ secrets.GITEE_TOKEN }}
+        run: |
+          for file in release_assets/*.apk; do
+            if [ -f "$file" ]; then
+              filename=$(basename "$file")
+              echo "Uploading $filename..."
+              curl -X POST "https://gitee.com/api/v5/repos/${{ secrets.GITEE_USER }}/Bambu-Card-Tools/releases/${{ env.RELEASE_ID }}/attach_files" \
+                -H "Content-Type: multipart/form-data" \
+                -F "access_token=${GITEE_TOKEN}" \
+                -F "file=@${file}"
+            fi
+          done
