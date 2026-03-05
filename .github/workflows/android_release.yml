@@ -103,12 +103,31 @@ jobs:
         files: |
           ${{ steps.rename_apk.outputs.apk_path_release }}
           ${{ steps.rename_apk.outputs.apk_path_beta }}
-  release_to_gitee:
+  sync_to_gitee:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 确保获取所有历史和标签
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Add Gitee Remote
+        run: |
+          git remote add gitee https://${{ secrets.GITEE_USER }}:${{ secrets.GITEE_TOKEN }}@gitee.com/${{ secrets.GITEE_USER }}/Bambu-Card-Tools.git
+
+      - name: Push Code to Gitee
+        run: |
+          git push gitee main --force
+
+      - name: Push Tags to Gitee
+        run: |
+          git push gitee --tags --force
 
       - name: Download Artifacts
         uses: actions/download-artifact@v4
@@ -118,19 +137,18 @@ jobs:
 
       - name: Prepare Assets
         run: |
-          mkdir release_assets
+          mkdir -p release_assets
           find build_artifacts -name "*.apk" -exec cp {} release_assets/ \;
           ls -R release_assets
 
       - name: Create Gitee Release and Upload
-        uses: nicennnnnnnlee/action-gitee-release@v2.0.0
+        uses: actions-cool/github-to-gitee@v2
         with:
-          gitee_action: create_release
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           gitee_token: ${{ secrets.GITEE_TOKEN }}
-          gitee_owner: ${{ secrets.GITEE_USER }}
+          gitee_user: ${{ secrets.GITEE_USER }}
           gitee_repo: Bambu-Card-Tools
-          gitee_target_commitish: ${{ github.sha }}
-          gitee_tag_name: ${{ github.ref_name }}
-          gitee_release_name: ${{ github.ref_name }}
-          gitee_release_body: "Synced release from GitHub Actions."
-          gitee_files: release_assets/*
+          sync_branches: true
+          sync_tags: true
+          sync_releases: true
+          sync_release_assets: true
