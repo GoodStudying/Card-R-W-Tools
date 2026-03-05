@@ -17,7 +17,7 @@ import android.view.ViewGroup
 import cn.ratnoumi.bcardtools.databinding.ActivityBatchBurnBinding
 import cn.ratnoumi.bcardtools.dao.BambuFilamentDao
 import cn.ratnoumi.bcardtools.drive.bambu.BambuFilamentCard
-import cn.ratnoumi.bcardtools.drive.bambu.BambuUtils
+import cn.ratnoumi.bcardtools.drive.bambu.bambuKdf
 import cn.ratnoumi.bcardtools.drive.mifare.defaultKeys
 import cn.ratnoumi.bcardtools.drive.mifare.findMifareSectorKeyA
 import cn.ratnoumi.bcardtools.drive.mifare.findMifareSectorKeyB
@@ -48,7 +48,7 @@ class BatchBurnActivity : BaseNfcAppCompatActivity() {
     }
 
     private fun setupRecyclerView() {
-        val cards = bambuFilamentDao.getAll()
+        val cards = bambuFilamentDao.findAll().filterNotNull()
         cardAdapter = BatchBurnCardAdapter(cards) {
             updateSelectedCards()
         }
@@ -98,7 +98,6 @@ class BatchBurnActivity : BaseNfcAppCompatActivity() {
         val currentCard = selectedCards[currentBurnIndex]
         binding.statusText.text = "正在烧写第 ${currentBurnIndex + 1} 张卡片：${currentCard.filamentType} - ${currentCard.colorName}"
 
-        // 等待用户刷卡
         Toast.makeText(this, "请刷入新卡片进行烧写", Toast.LENGTH_LONG).show()
     }
 
@@ -119,14 +118,13 @@ class BatchBurnActivity : BaseNfcAppCompatActivity() {
                 try {
                     val classic = MifareClassic.get(tag)
                     val keys = mutableListOf<ByteArray>()
-                    keys.addAll(BambuUtils.bambuKdf(classic.tag.id))
+                    keys.addAll(bambuKdf(classic.tag.id))
                     keys.addAll(defaultKeys)
 
                     if (!classic.isConnected) {
                         classic.connect()
                     }
 
-                    // 写入卡片数据
                     for (sectorIndex in 0 until classic.sectorCount) {
                         val keyA = findMifareSectorKeyA(classic, sectorIndex, keys)
                         val keyB = findMifareSectorKeyB(classic, sectorIndex, keys)
@@ -152,7 +150,6 @@ class BatchBurnActivity : BaseNfcAppCompatActivity() {
                     e.printStackTrace()
                     withContext(Dispatchers.Main) {
                         Toast.makeText(this@BatchBurnActivity, "烧写失败：${e.message}", Toast.LENGTH_SHORT).show()
-                        // 继续烧写下一张卡片
                         currentBurnIndex++
                         burnNextCard()
                     }
