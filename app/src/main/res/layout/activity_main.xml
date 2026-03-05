@@ -73,7 +73,8 @@
                 android:id="@+id/cardRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingHorizontal="10dp"
+                android:paddingHorizontal="4dp"
+                android:clipToPadding="false"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 app:layout_constraintTop_toBottomOf="@id/nullView"/>
     </LinearLayout>

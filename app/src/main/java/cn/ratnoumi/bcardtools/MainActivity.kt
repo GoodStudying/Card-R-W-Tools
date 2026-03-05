@@ -25,6 +25,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.children
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.GridLayoutManager
 import cn.ratnoumi.bcardtools.databinding.ActivityMainBinding
 import cn.ratnoumi.bcardtools.drive.bambu.BambuFilamentCard
 import cn.ratnoumi.bcardtools.drive.bambu.bambuKdf
@@ -438,7 +439,7 @@ class MainActivity : BaseNfcAppCompatActivity() {
 
         updateList()
         binding.cardRecyclerView.adapter = cardItemAdapter
-        binding.cardRecyclerView.layoutManager = LinearLayoutManager(this)
+        binding.cardRecyclerView.layoutManager = GridLayoutManager(this, 2)
 
         binding.toolbar.setOnClickListener {
             updateList()
