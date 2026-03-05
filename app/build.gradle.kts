@@ -16,7 +16,7 @@ android {
         // 自动计算 versionCode (基于 git commit 数量)
         versionCode = getGitCommitCount()
         // 优先使用环境变量中的 VERSION_NAME (CI/CD 传入)，否则使用默认值
-        versionName = System.getenv("VERSION_NAME") ?: "1.4.0"
+        versionName = System.getenv("VERSION_NAME") ?: "1.5.0"
 
         // 动态设置应用名称：正式版显示 "BCardTools"，非正式版显示 "BCardTools (Beta)"
         val isReleaseEnv = System.getenv("IS_RELEASE") == "true"

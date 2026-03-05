@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center_vertical">
+
+    <CheckBox
+        android:id="@+id/selectCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/filamentTypeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PETG HF"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/colorNameText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="绿色"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/uidText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="UID: 12345678"
+            android:textSize="12sp"
+            android:textColor="@android:color/secondary_text_light"
+            android:layout_marginTop="2dp" />
+
+    </LinearLayout>
+
+    <View
+        android:id="@+id/colorIndicator"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="12dp"
+        android:background="#00AE42"
+        android:shape="rectangle"
+        android:radius="4dp" />
+
+</LinearLayout>

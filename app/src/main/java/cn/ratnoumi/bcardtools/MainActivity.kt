@@ -673,6 +673,10 @@ class MainActivity : BaseNfcAppCompatActivity() {
                 true
             }
 
+            R.id.action_batch_burn -> {
+                startActivity(Intent(this, BatchBurnActivity::class.java))
+                true
+            }
 
             else -> super.onOptionsItemSelected(item)
         }
@@ -690,10 +694,10 @@ class MainActivity : BaseNfcAppCompatActivity() {
             Toast.makeText(this, "剪贴板为空", Toast.LENGTH_SHORT).show()
             return
         }
-        parseAndImportList(text)
+        parseAndImportBurnList(text)
     }
 
-    private fun parseAndImportList(text: String) {
+    private fun parseAndImportBurnList(text: String) {
         val lines = text.lines().filter { it.isNotBlank() }
         if (lines.isEmpty()) {
             Toast.makeText(this, "没有有效数据", Toast.LENGTH_SHORT).show()
