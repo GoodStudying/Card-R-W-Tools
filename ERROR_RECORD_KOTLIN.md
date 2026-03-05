@@ -1,19 +1,65 @@
+# 错误记录：Kotlin编译失败
+
+## 错误类型：Kotlin编译错误
+
+### 错误信息
+```
+> Task :app:compileReleaseKotlin FAILED
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:18:43 Unresolved reference 'BambuUtils'.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:26:1 Class 'BatchBurnActivity' is not abstract and does not implement abstract base class member:
+fun processTag(intent: Intent?): Unit
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:28:44 Unresolved reference 'BambuFilamentDao'.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:42:28 Unresolved reference 'BambuFilamentDao'.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:48:38 Unresolved reference 'getAll'.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:102:5 'processTag' overrides nothing. Potential signatures for overriding:
+fun processTag(intent: Intent?): Unit
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:102:37 Unresolved reference 'Intent'.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:107:27 Unresolved reference 'getParcelableExtra'.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:110:27 Unresolved reference 'getParcelableExtra'.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:113:14 Cannot infer type for type parameter 'R'. Specify it explicitly.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:115:44 Unresolved reference 'launch'.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:119:33 Unresolved reference 'BambuUtils'.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:143:21 Suspend function 'suspend fun <T> withContext(context: CoroutineContext, block: suspend CoroutineScope.() -> T): T' can only be called from a coroutine or another suspend function.
+e: file:///home/runner/work/Card-R-W-Tools/Card-R-W-Tools/app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt:150:21 Suspend function 'suspend fun <T> withContext(context: CoroutineContext, block: suspend CoroutineScope.() -> T): T' can only be called from a coroutine or another suspend function.
+```
+
+### 错误原因
+- **文件**：`app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt`
+- **问题**：
+  1. 缺少必要的导入语句
+  2. 未正确实现抽象方法
+  3. 协程相关的错误
+
+### 解决方案
+1. **添加必要的导入语句**：
+   - `import android.content.Intent`
+   - `import cn.ratnoumi.bcardtools.drive.bambu.BambuFilamentDao`
+   - `import cn.ratnoumi.bcardtools.drive.bambu.BambuUtils`
+
+2. **确保正确实现抽象方法**：
+   - 确保 `processTag` 方法的签名与父类一致
+
+3. **修复协程相关问题**：
+   - 确保 `withContext` 调用在协程作用域内
+
+### 正确的代码示例
+```kotlin
 package cn.ratnoumi.bcardtools
 
 import android.content.Intent
-import android.os.Build
 import android.nfc.NfcAdapter
 import android.nfc.Tag
 import android.nfc.tech.MifareClassic
+import android.os.Build
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.CheckBox
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
-import android.view.LayoutInflater
-import android.view.ViewGroup
 import cn.ratnoumi.bcardtools.databinding.ActivityBatchBurnBinding
 import cn.ratnoumi.bcardtools.drive.bambu.BambuFilamentCard
 import cn.ratnoumi.bcardtools.drive.bambu.BambuFilamentDao
@@ -234,3 +280,17 @@ class BatchBurnCardAdapter(
         val colorIndicator: View = itemView.findViewById(R.id.colorIndicator)
     }
 }
+```
+
+### 预防措施
+1. **导入检查**：确保所有使用的类和方法都有正确的导入语句
+2. **抽象方法实现**：确保正确实现所有抽象方法，签名与父类一致
+3. **协程使用**：确保在协程作用域内调用挂起函数
+4. **代码审查**：在提交前检查代码的语法和逻辑正确性
+5. **构建测试**：在提交前运行构建命令，确保没有编译错误
+
+### 相关文件
+- `app/src/main/java/cn/ratnoumi/bcardtools/BatchBurnActivity.kt`
+
+### 修复日期
+2026-03-05
