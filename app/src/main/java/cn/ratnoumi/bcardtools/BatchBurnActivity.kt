@@ -202,6 +202,7 @@ class BatchBurnActivity : BaseNfcAppCompatActivity() {
         val colorMap = getColorMap()
         var successCount = 0
         var skipCount = 0
+        val importedUids = mutableListOf<String>()
         for (line in lines) {
             val parts = line.split(Regex("[,\t\\s]+")).map { it.trim() }.filter { it.isNotEmpty() }
             if (parts.size < 3) {
@@ -216,12 +217,15 @@ class BatchBurnActivity : BaseNfcAppCompatActivity() {
             val cardData = createPlaceholderCard(filamentType, matchedColorName, color)
             if (!bambuFilamentDao.exist(cardData.uid)) {
                 bambuFilamentDao.add(cardData)
+                importedUids.add(cardData.uid)
                 successCount++
             } else {
                 skipCount++
             }
         }
         setupRecyclerView()
+        cardAdapter.selectByUids(importedUids)
+        updateSelectedCards()
         Toast.makeText(this, "导入成功: $successCount, 跳过: $skipCount", Toast.LENGTH_LONG).show()
     }
 
@@ -354,6 +358,16 @@ class BatchBurnCardAdapter(
 
     fun getSelectedCards(): MutableList<BambuFilamentCard> {
         return selectedPositions.map { cards[it] }.toMutableList()
+    }
+
+    fun selectByUids(uids: List<String>) {
+        selectedPositions.clear()
+        cards.forEachIndexed { index, card ->
+            if (uids.contains(card.uid)) {
+                selectedPositions.add(index)
+            }
+        }
+        notifyDataSetChanged()
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

@@ -133,11 +133,17 @@ class MainActivity : BaseNfcAppCompatActivity() {
             filament?.let { cards.add(it) }
         }
 
-        // 生成分类标签
+        val savedCategory = currentCategory
         generateCategories()
 
-        // 重置筛选条件并刷新列表
-        currentCategory = "全部"
+        if (savedCategory != null && savedCategory != "全部") {
+            currentCategory = savedCategory
+            binding.categoryContainer.children.filterIsInstance<Chip>().find { it.tag == savedCategory }?.isChecked = true
+        } else {
+            currentCategory = "全部"
+            binding.categoryContainer.children.filterIsInstance<Chip>().find { it.tag == "全部" }?.isChecked = true
+        }
+
         searchText = ""
         binding.searchEditText.setText("")
         filterCards()

@@ -32,7 +32,7 @@ class CardItemAdapter(
         
         if (item.count > 1) {
             holder.filamentTypeText.text = "${card.detailedFilamentType} (x${item.count})"
-            holder.UIDText.text = "${card.uid}..." // Indicate multiple
+            holder.UIDText.text = "${card.uid}..."
         } else {
             holder.filamentTypeText.text = card.detailedFilamentType
             holder.UIDText.text = card.uid
@@ -43,7 +43,8 @@ class CardItemAdapter(
         holder.productionDate.text = card.productionDate
         holder.colorNameText.text = card.colorName
         holder.filamentColorText.text = "#${Integer.toHexString(card.color).uppercase()}"
-        holder.filamentColorIndicator.setBackgroundColor(card.color)
+        holder.colorIndicator.setBackgroundColor(card.color)
+        holder.colorBlock.setBackgroundColor(card.color)
         holder.itemView.setOnClickListener {
             onItemClick(item)
         }
@@ -81,7 +82,8 @@ class CardItemAdapter(
         val UIDText: TextView = itemView.findViewById(R.id.UIDText)
         val productionDate: TextView = itemView.findViewById(R.id.productionDateText)
         val filamentColorText: TextView = itemView.findViewById(R.id.filamentColorText)
-        val filamentColorIndicator: TextView = itemView.findViewById(R.id.filamentColorIndicator)
+        val colorIndicator: View = itemView.findViewById(R.id.colorIndicator)
+        val colorBlock: View = itemView.findViewById(R.id.colorBlock)
         val colorNameText: TextView = itemView.findViewById(R.id.colorNameText)
     }
 }
